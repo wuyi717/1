@@ -1,0 +1,588 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>七段数码管 · 段码屏教学展示</title>
+  <style>
+    /* 全局样式：清爽教学风格 */
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    body {
+      font-family: 'Segoe UI', Roboto, system-ui, sans-serif;
+      background: linear-gradient(145deg, #f0f4fa 0%, #e2eaf3 100%);
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      margin: 0;
+      padding: 1.5rem;
+    }
+    .card {
+      background: rgba(255, 255, 255, 0.8);
+      backdrop-filter: blur(6px);
+      border-radius: 3rem 3rem 2rem 2rem;
+      box-shadow: 0 20px 40px -12px rgba(0, 20, 30, 0.4), inset 0 1px 3px rgba(255, 255, 255, 0.7);
+      padding: 2rem 2rem 2.5rem;
+      max-width: 750px;
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      border: 1px solid rgba(255, 255, 255, 0.6);
+      transition: box-shadow 0.3s;
+    }
+    h1 {
+      font-size: 1.9rem;
+      font-weight: 600;
+      letter-spacing: 1px;
+      color: #1e3b5c;
+      margin-bottom: 0.25rem;
+      text-shadow: 0 2px 3px rgba(255, 255, 255, 0.8);
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+    }
+    h1 span {
+      background: #1e3b5c;
+      color: #f0f9ff;
+      font-size: 1.3rem;
+      padding: 0.2rem 1rem;
+      border-radius: 40px;
+      font-weight: 400;
+      letter-spacing: 0.5px;
+    }
+    .subhead {
+      color: #2d4d6e;
+      margin-bottom: 2rem;
+      font-size: 1rem;
+      border-bottom: 2px dashed #b4c8dc;
+      padding-bottom: 0.75rem;
+      width: 100%;
+      text-align: center;
+      font-weight: 400;
+      opacity: 0.9;
+    }
+    /* 段码屏主体区域 */
+    .display-area {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      margin: 0.5rem 0 1.8rem;
+      position: relative;
+    }
+    .segment-container {
+      position: relative;
+      width: 260px;
+      height: 380px;
+      background: #141c24;
+      border-radius: 36px;
+      box-shadow: 
+        inset 0 0 20px #000000,
+        0 16px 24px -6px rgba(0, 0, 0, 0.6),
+        0 0 0 2px #2d3e50,
+        0 0 0 6px #1a2530;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      transition: box-shadow 0.2s;
+    }
+    /* 七段显示内部画布，用绝对定位放置小灯 */
+    .segments {
+      position: relative;
+      width: 200px;
+      height: 320px;
+    }
+    /* 每个小灯（段）的样式 */
+    .segment {
+      position: absolute;
+      background: #3a4c5e;
+      border-radius: 20px;
+      box-shadow: 
+        0 0 0 1px rgba(255, 255, 255, 0.05),
+        inset 0 -2px 4px rgba(0, 0, 0, 0.5),
+        0 0 8px rgba(0, 0, 0, 0.3);
+      transition: background 0.25s ease, box-shadow 0.2s ease, filter 0.2s;
+      /* 默认未点亮状态 */
+      background: #2e3e4e;
+      filter: brightness(0.7);
+    }
+    /* 点亮状态 */
+    .segment.lit {
+      background: #ff3b3b;
+      box-shadow: 
+        0 0 12px #ff5e5e,
+        0 0 24px #ff1a1a,
+        inset 0 -2px 6px rgba(255, 255, 255, 0.7),
+        inset 0 2px 4px white;
+      filter: brightness(1.2);
+    }
+    /* 各段位置尺寸 — 精细布局 */
+    /* a段 — 上横 */
+    .seg-a {
+      width: 120px;
+      height: 22px;
+      top: 10px;
+      left: 40px;
+      border-radius: 16px;
+    }
+    /* b段 — 右上竖 */
+    .seg-b {
+      width: 22px;
+      height: 110px;
+      top: 40px;
+      right: 18px;
+      border-radius: 16px;
+    }
+    /* c段 — 右下竖 */
+    .seg-c {
+      width: 22px;
+      height: 110px;
+      bottom: 40px;
+      right: 18px;
+      border-radius: 16px;
+    }
+    /* d段 — 下横 */
+    .seg-d {
+      width: 120px;
+      height: 22px;
+      bottom: 10px;
+      left: 40px;
+      border-radius: 16px;
+    }
+    /* e段 — 左下竖 */
+    .seg-e {
+      width: 22px;
+      height: 110px;
+      bottom: 40px;
+      left: 18px;
+      border-radius: 16px;
+    }
+    /* f段 — 左上竖 */
+    .seg-f {
+      width: 22px;
+      height: 110px;
+      top: 40px;
+      left: 18px;
+      border-radius: 16px;
+    }
+    /* g段 — 中横 */
+    .seg-g {
+      width: 120px;
+      height: 22px;
+      top: 154px;  /* 居中 */
+      left: 40px;
+      border-radius: 16px;
+    }
+
+    /* 控制区域 */
+    .control-panel {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      align-items: center;
+      gap: 1.2rem;
+      margin: 0.5rem 0 1rem;
+    }
+    .input-group {
+      display: flex;
+      align-items: center;
+      gap: 0.8rem;
+      background: #ffffffd9;
+      padding: 0.4rem 0.4rem 0.4rem 1.5rem;
+      border-radius: 60px;
+      box-shadow: 0 6px 12px rgba(0, 0, 0, 0.08), inset 0 1px 4px white;
+      border: 1px solid #cbdae7;
+    }
+    .input-group label {
+      font-weight: 600;
+      color: #1d3b58;
+      font-size: 1.1rem;
+      letter-spacing: 0.5px;
+    }
+    .input-group input {
+      width: 90px;
+      padding: 0.75rem 0.2rem 0.75rem 0.8rem;
+      font-size: 1.5rem;
+      font-weight: 700;
+      text-align: center;
+      border: none;
+      border-radius: 40px;
+      background: #eaf1f9;
+      color: #0e2a42;
+      outline: 2px solid transparent;
+      transition: outline 0.2s, background 0.2s;
+      box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.05);
+      font-family: 'Courier New', monospace;
+    }
+    .input-group input:focus {
+      outline: 2px solid #2f78c4;
+      background: #ffffff;
+    }
+    .input-group button {
+      padding: 0.75rem 1.8rem;
+      font-size: 1.1rem;
+      font-weight: 600;
+      background: #1e3b5c;
+      color: white;
+      border: none;
+      border-radius: 50px;
+      cursor: pointer;
+      transition: all 0.2s;
+      box-shadow: 0 8px 16px -4px #1e3b5c80, 0 2px 4px #00000020;
+      letter-spacing: 0.6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .input-group button:hover {
+      background: #254e75;
+      transform: scale(1.02);
+      box-shadow: 0 12px 20px -6px #1e3b5c;
+    }
+    .input-group button:active {
+      transform: scale(0.97);
+      background: #142c41;
+    }
+    /* 数字快捷按钮组 */
+    .quick-numbers {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 0.6rem;
+      margin-top: 0.2rem;
+    }
+    .quick-btn {
+      background: white;
+      border: none;
+      width: 48px;
+      height: 48px;
+      border-radius: 30px;
+      font-size: 1.4rem;
+      font-weight: 700;
+      color: #1b3a57;
+      cursor: pointer;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08), 0 0 0 1px #bdd0e2 inset;
+      transition: all 0.1s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'Segoe UI', sans-serif;
+    }
+    .quick-btn:hover {
+      background: #f0f7ff;
+      box-shadow: 0 8px 14px rgba(28, 80, 130, 0.2), 0 0 0 2px #3f8fd8 inset;
+      transform: translateY(-2px);
+      color: #0f2e4a;
+    }
+    .quick-btn:active {
+      transform: translateY(1px);
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1), 0 0 0 1px #7fa5c9 inset;
+    }
+    .error-msg {
+      color: #c62828;
+      background: #ffebee;
+      padding: 0.4rem 1.2rem;
+      border-radius: 30px;
+      font-size: 0.9rem;
+      font-weight: 500;
+      margin-top: 0.5rem;
+      opacity: 0;
+      transition: opacity 0.2s;
+      border: 1px solid #ef9a9a;
+      min-height: 2.2rem;
+      display: flex;
+      align-items: center;
+    }
+    .error-msg.show {
+      opacity: 1;
+    }
+    /* 图例说明 */
+    .legend {
+      display: flex;
+      justify-content: center;
+      gap: 2rem;
+      margin-top: 1.5rem;
+      font-size: 0.9rem;
+      color: #2b4c6e;
+      background: #d9e5f0b8;
+      padding: 0.6rem 1.8rem;
+      border-radius: 50px;
+      backdrop-filter: blur(4px);
+      border: 1px solid #ffffffb0;
+      flex-wrap: wrap;
+    }
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .dot {
+      width: 18px;
+      height: 18px;
+      border-radius: 6px;
+      background: #3a4c5e;
+      box-shadow: inset 0 -2px 4px #00000050;
+    }
+    .dot.active {
+      background: #ff3b3b;
+      box-shadow: 0 0 10px #ff5e5e, inset 0 -2px 6px white;
+    }
+    .footer-note {
+      margin-top: 1.8rem;
+      font-size: 0.85rem;
+      color: #5e7c9c;
+      text-align: center;
+      border-top: 1px solid #cbdae7;
+      padding-top: 1rem;
+      width: 100%;
+      letter-spacing: 0.3px;
+    }
+    /* 响应式适配 */
+    @media (max-width: 520px) {
+      .card { padding: 1.5rem 1rem; }
+      .segment-container { width: 220px; height: 330px; }
+      .segments { width: 170px; height: 280px; }
+      .seg-a, .seg-d, .seg-g { width: 100px; left: 35px; }
+      .seg-b, .seg-c, .seg-e, .seg-f { width: 18px; height: 95px; }
+      .seg-b, .seg-c { right: 14px; }
+      .seg-e, .seg-f { left: 14px; }
+      .seg-g { top: 136px; }
+      .seg-d { bottom: 8px; }
+      .seg-a { top: 8px; }
+      .seg-b, .seg-f { top: 35px; }
+      .seg-c, .seg-e { bottom: 35px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h1>
+      ⚡ 段码屏显示
+      <span>七段数码管</span>
+    </h1>
+    <div class="subhead">a b c d e f g — 小灯组成的数字世界</div>
+
+    <!-- 段码屏显示区 -->
+    <div class="display-area">
+      <div class="segment-container">
+        <div class="segments" id="segments">
+          <!-- 七个段，按照标准位置命名 a b c d e f g -->
+          <div class="segment seg-a" id="seg-a" data-seg="a"></div>
+          <div class="segment seg-b" id="seg-b" data-seg="b"></div>
+          <div class="segment seg-c" id="seg-c" data-seg="c"></div>
+          <div class="segment seg-d" id="seg-d" data-seg="d"></div>
+          <div class="segment seg-e" id="seg-e" data-seg="e"></div>
+          <div class="segment seg-f" id="seg-f" data-seg="f"></div>
+          <div class="segment seg-g" id="seg-g" data-seg="g"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 控制区 -->
+    <div class="control-panel">
+      <div class="input-group">
+        <label for="digitInput">数字</label>
+        <input type="text" id="digitInput" maxlength="1" placeholder="0-9" inputmode="numeric" value="8">
+        <button id="displayBtn">显示</button>
+      </div>
+    </div>
+    <!-- 快捷数字按钮 -->
+    <div class="quick-numbers" id="quickNumbers">
+      <!-- JS 动态生成0-9按钮，保证顺序 -->
+    </div>
+
+    <!-- 错误提示 -->
+    <div class="error-msg" id="errorMsg"></div>
+
+    <!-- 图例 -->
+    <div class="legend">
+      <div class="legend-item"><span class="dot"></span> 熄灭 (0)</div>
+      <div class="legend-item"><span class="dot active"></span> 点亮 (1)</div>
+    </div>
+    <div class="footer-note">
+      ⚙️ 输入 0~9 内任意数字，点击「显示」或按回车 → 对应段码点亮
+    </div>
+  </div>
+
+  <script>
+    (function(){
+      // ---------- 数字到段的映射 (共阴/共阳逻辑：1表示点亮) ----------
+      // 顺序: a, b, c, d, e, f, g
+      const SEG_MAP = {
+        '0': [1, 1, 1, 1, 1, 1, 0], // 0: a b c d e f 亮, g灭
+        '1': [0, 1, 1, 0, 0, 0, 0], // 1: b c 亮
+        '2': [1, 1, 0, 1, 1, 0, 1], // 2: a b d e g 亮
+        '3': [1, 1, 1, 1, 0, 0, 1], // 3: a b c d g 亮
+        '4': [0, 1, 1, 0, 0, 1, 1], // 4: b c f g 亮
+        '5': [1, 0, 1, 1, 0, 1, 1], // 5: a c d f g 亮
+        '6': [1, 0, 1, 1, 1, 1, 1], // 6: a c d e f g 亮
+        '7': [1, 1, 1, 0, 0, 0, 0], // 7: a b c 亮
+        '8': [1, 1, 1, 1, 1, 1, 1], // 8: 全亮
+        '9': [1, 1, 1, 1, 0, 1, 1]  // 9: a b c d f g 亮 (e灭)
+      };
+
+      // DOM 元素
+      const segments = {
+        a: document.getElementById('seg-a'),
+        b: document.getElementById('seg-b'),
+        c: document.getElementById('seg-c'),
+        d: document.getElementById('seg-d'),
+        e: document.getElementById('seg-e'),
+        f: document.getElementById('seg-f'),
+        g: document.getElementById('seg-g')
+      };
+      const segOrder = ['a', 'b', 'c', 'd', 'e', 'f', 'g'];
+
+      const digitInput = document.getElementById('digitInput');
+      const displayBtn = document.getElementById('displayBtn');
+      const errorMsg = document.getElementById('errorMsg');
+      const quickNumbersContainer = document.getElementById('quickNumbers');
+
+      // ---------- 核心函数：根据数字点亮对应的段 ----------
+      function displayDigit(digit) {
+        // 清除之前的高亮
+        segOrder.forEach(seg => {
+          segments[seg].classList.remove('lit');
+        });
+
+        // 获取映射数组，若无效则默认全灭
+        const segmentsState = SEG_MAP[digit];
+        if (!segmentsState) {
+          // 无效数字 (理论上不会发生，因为输入已经过滤)
+          return;
+        }
+
+        // 根据映射点亮对应段 (1 -> 添加 lit 类)
+        segOrder.forEach((seg, index) => {
+          if (segmentsState[index] === 1) {
+            segments[seg].classList.add('lit');
+          }
+        });
+      }
+
+      // ---------- 处理用户输入并显示 ----------
+      function handleDisplay() {
+        let rawValue = digitInput.value.trim();
+        
+        // 去掉可能的小数点或空格
+        if (rawValue.length === 0) {
+          showError('请输入一个数字 (0-9)');
+          return;
+        }
+
+        // 只取第一个字符（因为 maxlength=1，但防止粘贴多字符）
+        const firstChar = rawValue.charAt(0);
+        
+        // 检查是否是 0-9 的数字
+        if (!/^[0-9]$/.test(firstChar)) {
+          showError('仅支持 0~9 的数字');
+          return;
+        }
+
+        // 输入框规范化为单个数字
+        digitInput.value = firstChar;
+
+        // 清除错误提示
+        clearError();
+
+        // 核心：点亮对应段码
+        displayDigit(firstChar);
+      }
+
+      // 显示错误提示
+      function showError(message) {
+        errorMsg.textContent = message;
+        errorMsg.classList.add('show');
+        // 5秒后自动隐藏
+        if (window.errorTimeout) clearTimeout(window.errorTimeout);
+        window.errorTimeout = setTimeout(() => {
+          errorMsg.classList.remove('show');
+        }, 3000);
+      }
+
+      function clearError() {
+        errorMsg.classList.remove('show');
+        if (window.errorTimeout) {
+          clearTimeout(window.errorTimeout);
+          window.errorTimeout = null;
+        }
+      }
+
+      // ---------- 初始化快捷数字按钮 0-9 ----------
+      function initQuickButtons() {
+        for (let i = 0; i <= 9; i++) {
+          const btn = document.createElement('button');
+          btn.classList.add('quick-btn');
+          btn.textContent = i;
+          btn.setAttribute('aria-label', `显示数字 ${i}`);
+          btn.addEventListener('click', () => {
+            digitInput.value = i;
+            clearError();
+            displayDigit(i);  // 直接点亮，无需再校验
+          });
+          quickNumbersContainer.appendChild(btn);
+        }
+      }
+
+      // ---------- 事件监听 ----------
+      displayBtn.addEventListener('click', handleDisplay);
+
+      // 回车键在输入框内触发显示
+      digitInput.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') {
+          e.preventDefault();
+          handleDisplay();
+        }
+      });
+
+      // 输入时如果有非数字字符，可以实时过滤提示(可选)，但保留用户输入自由，点击显示时校验。
+      // 为了体验更好：在输入时如果长度超过1，自动截取第一位
+      digitInput.addEventListener('input', (e) => {
+        // 移除非数字字符（但允许暂时空）
+        let val = e.target.value;
+        if (val.length > 1) {
+          // 保留第一个字符，前提是它是数字；如果不是数字，就清空
+          const first = val.charAt(0);
+          if (/[0-9]/.test(first)) {
+            e.target.value = first;
+          } else {
+            e.target.value = '';
+          }
+        }
+        // 如果当前字符是非数字，清空 (但允许空)
+        if (e.target.value.length === 1 && !/[0-9]/.test(e.target.value)) {
+          e.target.value = '';
+        }
+        // 清除之前的错误提示（因为用户正在修改）
+        clearError();
+      });
+
+      // 额外：如果输入框失去焦点时内容为空，可以保留不变；但我们不做强制
+
+      // 页面加载后，初始化快捷按钮和默认显示数字'8'
+      window.addEventListener('DOMContentLoaded', () => {
+        initQuickButtons();
+        // 默认显示 8 (输入框已经 value="8")
+        // 确保先清空所有段再点亮
+        displayDigit('8');
+      });
+
+      // 兼容如果脚本在DOMContentLoaded之后执行（已经加载完成）
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', () => {
+          initQuickButtons();
+          displayDigit('8');
+        });
+      } else {
+        // 立即执行
+        initQuickButtons();
+        displayDigit('8');
+      }
+    })();
+  </script>
+</body>
+</html>
